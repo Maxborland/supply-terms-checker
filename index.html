@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сверка договоров поставки</title>
+<style>
+  :root { --bg: #fafaf8; --card: #fff; --ink: #1d1d1b; --muted: #6b6b66; --line: #e3e2dc; --accent: #1f5fbf;
+          --warn: #9a5b00; --warn-bg: #fff4dc; --na: #8a1c1c; --hl: #fff1a8; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161615; --card: #1f1f1d; --ink: #ecebe6; --muted: #a09f98; --line: #34332f; --accent: #7fb0ff;
+            --warn: #f0b252; --warn-bg: #3a2d14; --na: #ff8a80; --hl: #5a4d00; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 12px; }
+  p.lead { color: var(--muted); margin: 0 0 20px; }
+  section.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .drop { border: 1.5px dashed var(--line); border-radius: 10px; padding: 14px; flex: 1 1 280px; text-align: center; color: var(--muted); }
+  .drop.over { border-color: var(--accent); color: var(--accent); }
+  button, input, select { font: inherit; color: inherit; }
+  button { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  input, select { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; }
+  label { white-space: nowrap; }
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 860px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px; border-bottom: 1px solid var(--line); }
+  th { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .val { font-weight: 600; font-size: 16px; }
+  .na { color: var(--na); font-weight: 600; }
+  .cite { display: block; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .cite q { display: block; font-style: italic; }
+  a.src { color: var(--accent); }
+  .badge { display: inline-block; font-size: 12px; border-radius: 6px; padding: 1px 6px; margin: 2px 0; border: 1px solid var(--line); }
+  .warn { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+  ul.plain { margin: 0; padding-left: 18px; }
+  ul.plain li { margin-bottom: 8px; }
+  .muted { color: var(--muted); }
+  .quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .forms { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; }
+  .forms form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  #answer:empty { display: none; }
+  #answer { border-left: 3px solid var(--accent); padding: 8px 12px; background: var(--bg); }
+  details.doc { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; background: var(--card); }
+  details.doc summary { padding: 8px 12px; cursor: pointer; }
+  details.doc ol { margin: 0; padding: 4px 12px 12px 48px; font-size: 14px; }
+  details.doc li { padding: 2px 4px; border-radius: 4px; scroll-margin-top: 80px; }
+  details.doc li.flash { background: var(--hl); }
+  .empty { color: var(--muted); padding: 12px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Сверка договоров поставки</h1>
+  <p class="lead">Загрузите договоры, допсоглашения и письма в TXT. Таблица покажет сумму и срок поставки на дату проверки, у каждого значения есть цитата и ссылка на абзац исходного файла.</p>
+
+  <section class="card">
+    <div class="controls">
+      <label class="drop" id="drop">Перетащите TXT-файлы сюда или <input type="file" id="files" accept=".txt,text/plain" multiple></label>
+      <button id="sample">Загрузить пример (6 документов)</button>
+      <button id="clear">Очистить</button>
+      <label>Дата проверки <input type="date" id="date" value="2026-03-10"></label>
+    </div>
+    <p class="muted" id="loaded" style="margin:8px 0 0"></p>
+  </section>
+
+  <h2>Договоры на дату проверки</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Договор</th><th>Поставщик</th><th>Сумма</th><th>Срок поставки</th><th>Не согласовано / требует проверки</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+
+  <h2>Вопросы</h2>
+  <section class="card">
+    <div class="quick">
+      <button data-q="field" data-no="STN-101" data-field="delivery">Срок STN-101 на дату проверки</button>
+      <button data-q="field" data-no="STN-102" data-field="amount">Сумма STN-102</button>
+      <button data-q="field" data-no="STN-103" data-field="amount">Сумма STN-103</button>
+      <button data-q="before" data-date="2026-04-01">Поставки раньше 01.04.2026</button>
+    </div>
+    <div class="forms">
+      <form id="qfield">
+        <select id="qkey"><option value="delivery">Срок поставки</option><option value="amount">Сумма</option></select>
+        <span>по договору</span><select id="qno"></select>
+        <button>Показать</button>
+      </form>
+      <form id="qbefore">
+        <span>Поставка раньше</span><input type="date" id="qdate" value="2026-04-01">
+        <button>Найти</button>
+      </form>
+    </div>
+    <div id="answer"></div>
+  </section>
+
+  <h2>Исходные документы</h2>
+  <div id="unlinked"></div>
+  <div id="docs"></div>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>
