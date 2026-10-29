@@ -27,6 +27,8 @@
   button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   input, select { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; }
   label { white-space: nowrap; }
+  label.drop { white-space: normal; }
+  input[type=file] { max-width: 100%; }
   .table-wrap { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; min-width: 860px; }
   th, td { text-align: left; vertical-align: top; padding: 10px; border-bottom: 1px solid var(--line); }
@@ -36,7 +38,7 @@
   .cite { display: block; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
   .cite q { display: block; font-style: italic; }
   a.src { color: var(--accent); }
-  .badge { display: inline-block; font-size: 12px; border-radius: 6px; padding: 1px 6px; margin: 2px 0; border: 1px solid var(--line); }
+  .badge { display: inline-block; font-size: 12px; border-radius: 6px; padding: 1px 6px; margin: 2px 0; border: 1px solid var(--line); overflow-wrap: anywhere; }
   .warn { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
   ul.plain { margin: 0; padding-left: 18px; }
   ul.plain li { margin-bottom: 8px; }
